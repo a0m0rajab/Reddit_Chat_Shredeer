@@ -62,7 +62,6 @@ async function deleteMessages(messages, autherization, roomId, userId) {
                 )
             }
         }
-
         resolve(messages.length + " Messages Deleted Successfully")
     })
 }
@@ -173,19 +172,6 @@ async function removeThisRoom() {
     let result = await deleteMessages(messages, autherization, roomId, userId);
     document.getElementById('done').style.visibility = 'visible';
     return result;
-}
-
-async function leaveRoom(roomId, autherization) {
-    let x =await fetch(RedditLink + `rooms/${roomId}/leave`, {
-        method: "POST",
-        headers: {
-            authorization: autherization || ""
-        }
-    })
-    let y = await x.json()
-    console.log("Leave Room ", y);
-    debugger;
-    return x
 }
 
 async function deleteAll() {
