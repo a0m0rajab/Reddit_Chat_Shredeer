@@ -142,49 +142,14 @@ async function getFilter(autherization, user_id) {
 }
 
 async function getAllRooms(authorization) {
-    let next_batch = ""
-    let result = []
-    let user_id = await getUserId(authorization)
-    let filter = await getFilter(authorization, user_id)
-    const requestOptions = {
-        method: "GET",
+    let x = await fetch(RedditLink + `joined_rooms`, {
         headers: {
-            authorization: authorization || ""
-        },
-        redirect: "follow"
-    }
-
-    do {
-        let url =
-            RedditLink + `sync?filter=${filter}&full_state=true&since=` + next_batch
-        await delay(1000);
-        let responce = await fetch(url, requestOptions)
-        let data = await responce.json()
-        result.push(...Object.keys(data.rooms?.join || {}))
-        if (data.next_batch) {
-            next_batch = data.next_batch
+            authorization
         }
-        console.log("Next Batch ", next_batch)
-        // if data errcode: "M_LIMIT_EXCEEDED"
-        if (data.errcode) {
-            let delayTime = 1000;
-            console.error("Extension Error ", data);
-            let waitTime = data.retry_after_ms;
-            // debugger;
-            // wait for the retry_after_ms
-            if (data.retry_after_ms < delayTime) {
-                waitTime = delayTime
-            }
-            await new Promise((resolve) => {
-                setTimeout(() => {
-                    resolve()
-                }, waitTime);
-            })
-        }
-        // console.log("Next Batch", next_batch)
-    } while (next_batch === undefined || next_batch !== "END")
+    })
+    let result = await x.json()
 
-    return result
+    return result.joined_rooms
 }
 
 async function delay(ms) {
@@ -220,6 +185,7 @@ async function deleteAll() {
     const authHeader = "bearer " + JSON.parse(document.querySelector("[token]").getAttribute("token")).token;
     let userId = await getUserId(authHeader);
     let allRooms = await getAllRooms(authHeader);
+    debugger;
     // set total rooms
     document.getElementById('totalRooms').textContent = allRooms.length;
     let counter = 1;
