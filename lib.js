@@ -157,14 +157,42 @@ async function getAllRooms(authorization) {
     do {
         let url =
             RedditLink + `sync?filter=${filter}&full_state=true&since=` + next_batch
+        await delay(1000);
         let responce = await fetch(url, requestOptions)
         let data = await responce.json()
         result.push(...Object.keys(data.rooms?.join || {}))
-        next_batch = data.next_batch
+        if (data.next_batch) {
+            next_batch = data.next_batch
+        }
+        console.log("Next Batch ", next_batch)
+        // if data errcode: "M_LIMIT_EXCEEDED"
+        if (data.errcode) {
+            let delayTime = 1000;
+            console.error("Extension Error ", data);
+            let waitTime = data.retry_after_ms;
+            // debugger;
+            // wait for the retry_after_ms
+            if (data.retry_after_ms < delayTime) {
+                waitTime = delayTime
+            }
+            await new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve()
+                }, waitTime);
+            })
+        }
         // console.log("Next Batch", next_batch)
-    } while (!!next_batch)
+    } while (next_batch === undefined || next_batch !== "END")
 
     return result
+}
+
+async function delay(ms) {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve()
+        }, ms)
+    })
 }
 
 
@@ -198,11 +226,12 @@ async function deleteAll() {
     for await (let roomId of allRooms) {
         // set room number
         document.getElementById('roomNo').textContent = counter;
-        console.log(`Deleting messages from ${counter++} of ${allRooms.length} rooms`);
+        console.log(`Deleting messages from ${counter} of ${allRooms.length} rooms`);
         let messages = await getRoomMessages(roomId, authHeader, roomId, userId);
         let result = await deleteMessages(messages, authHeader, roomId, userId);
         console.log("Result ", result);
-        console.log(`Messages deleted from ${counter++} of ${allRooms.length} rooms`);
+        console.log(`Messages deleted from ${counter} of ${allRooms.length} rooms`);
+        counter++;
     }
     console.log(allRooms);
     getSpan.forEach(element => {
