@@ -160,13 +160,17 @@ async function delay(ms) {
     })
 }
 
+const getAuthToken = () => {
+    return "bearer " + JSON.parse(document.querySelector("[token]").getAttribute("token")).token;
+}
+
 
 async function removeThisRoom() {
     document.getElementById('done').style.visibility = 'hidden';
     let stats = document.getElementById('stats');
     stats.style.visibility = 'visible';
     let roomId = window.location.pathname.split("/")[2];
-    let autherization = "bearer " + JSON.parse(document.querySelector("[token]").getAttribute("token")).token
+    let autherization = getAuthToken();
     let userId = await getUserId(autherization)
     let messages = await getRoomMessages(roomId, autherization, roomId, userId);
     let result = await deleteMessages(messages, autherization, roomId, userId);
@@ -182,7 +186,7 @@ async function deleteAll() {
     getSpan.forEach(element => {
         element.style.visibility = 'visible';
     });
-    const authHeader = "bearer " + JSON.parse(document.querySelector("[token]").getAttribute("token")).token;
+    const authHeader = getAuthToken();
     let userId = await getUserId(authHeader);
     let allRooms = await getAllRooms(authHeader);
     debugger;
