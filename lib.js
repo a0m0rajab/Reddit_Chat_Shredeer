@@ -160,9 +160,6 @@ async function delay(ms) {
     })
 }
 
-const getAuthToken = () => {
-    return "bearer " + JSON.parse(document.querySelector("[token]").getAttribute("token")).token;
-}
 
 
 async function removeThisRoom() {
@@ -283,3 +280,34 @@ if (faceplateApp.firstChild) {
 // add height 90dvh to rs-app
 let rsApp = document.querySelector('rs-app');
 rsApp.style.height = '90dvh';
+let AuthToken = "";
+// inject page-context script (so it runs in the page's window)
+const s = document.createElement('script');
+s.src = chrome.runtime.getURL('injected.js');
+s.onload = () => s.remove(); // clean up
+(document.head || document.documentElement).appendChild(s);
+
+window.addEventListener('message', (event) => {
+    // only accept messages from the page itself
+    if (event.source !== window) return;
+    if (event.data.type && (event.data.type === 'reddit-auth-intercepted')) {
+        // console.log("Content script received: ", event.data);
+        var msg = {
+            source: 'content-script',
+            payload: event.data
+        };
+        AuthToken = event.data.authorization;
+        // Log the message to the console
+        console.log("Auth Token Intercepted", AuthToken);
+    } else {
+        return;
+    }
+    // Optional: forward to extension background script
+    // chrome.runtime.sendMessage({ type: 'network-call', payload: msg.payload });
+});
+
+
+const getAuthToken = () => {
+    // make first letter small letter
+    return AuthToken.charAt(0).toLowerCase() + AuthToken.slice(1);
+}

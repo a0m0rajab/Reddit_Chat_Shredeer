@@ -1,14 +1,19 @@
 {
-    "manifest_version": 3,
-    "name": "Reddit Chat Shredder",
-    "version": "0.0.1",
-    "description": "This extensions allows you to remove the chat messages from a Reddit chat room.",
-    "content_scripts": [
-      {
-        "js": ["lib.js"],
-        "matches": [
-          "https://chat.reddit.com/*"
-        ]
-      }
-    ]
-  }
+  "manifest_version": 3,
+  "name": "Reddit Chat Shredder",
+  "version": "0.0.1",
+  "description": "This extensions allows you to remove the chat messages from a Reddit chat room.",
+  "permissions": ["scripting", "activeTab"],
+  "content_scripts": [
+    {
+      "js": ["lib.js"],
+      "matches": ["https://chat.reddit.com/*"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["injected.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
